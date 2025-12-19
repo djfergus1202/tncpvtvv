@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PodScript Studio | RSS • YouTube • Transcribe • Publish</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+  
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #1a1a1a;
+      --surface-hover: #242424;
+      --primary: #e50914;
+      --primary-hover: #f40612;
+      --accent: #b8956e;
+      --success: #46d369;
+      --warning: #f5c518;
+      --text: #ffffff;
+      --text-dim: #b3b3b3;
+      --text-muted: #666;
+      --border: #333;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 0.75rem 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .model-badge {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .model-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background 0.3s;
+    }
+    
+    .model-dot.ready { background: var(--success); }
+    .model-dot.loading { background: var(--warning); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+    }
+
+    .btn:hover { background: var(--surface-hover); border-color: var(--text-muted); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--success); border-color: var(--success); color: #000; }
+
+    main { padding: 80px 2rem 2rem; max-width: 1400px; margin: 0 auto; }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header h1 span { color: var(--primary); }
+    .page-header p { color: var(--text-dim); max-width: 700px; margin: 0 auto; }
+
+    /* Input Section */
+    .input-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    .input-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .input-tab:hover { color: var(--text); background: var(--surface-hover); }
+    .input-tab.active { background: var(--primary); color: white; }
+
+    .input-panel { display: none; }
+    .input-panel.active { display: block; }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-row input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+    }
+
+    .input-row input:focus { outline: none; border-color: var(--primary); }
+    .input-row input::placeholder { color: var(--text-muted); }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+      border-color: var(--primary);
+      background: rgba(229, 9, 20, 0.05);
+    }
+
+    .upload-area-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .upload-area-title { font-weight: 600; margin-bottom: 0.25rem; }
+    .upload-area-hint { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Progress Section */
+    .progress-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .progress-title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .progress-stats {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .progress-bar-wrap {
+      background: var(--bg);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-status {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    /* Queue Grid */
+    .queue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .queue-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .queue-item:hover { border-color: var(--text-muted); }
+    .queue-item.transcribing { border-color: var(--warning); background: rgba(245, 197, 24, 0.05); }
+    .queue-item.completed { border-color: var(--success); background: rgba(70, 211, 105, 0.05); }
+    .queue-item.error { border-color: var(--primary); background: rgba(229, 9, 20, 0.05); }
+
+    .queue-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .queue-item-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      flex: 1;
+      margin-right: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .queue-item-status {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .queue-item-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .queue-item-progress {
+      height: 4px;
+      background: var(--bg);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .queue-item-progress-bar {
+      height: 100%;
+      background: var(--warning);
+      transition: width 0.3s;
+    }
+
+    .queue-item.completed .queue-item-progress-bar { background: var(--success); }
+
+    /* Transcript Viewer */
+    .transcript-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 1.5rem;
+    }
+
+    .transcript-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .transcript-title { font-weight: 600; }
+
+    .transcript-content {
+      padding: 1.5rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .transcript-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.9;
+    }
+
+    .transcript-text p {
+      margin-bottom: 1rem;
+      text-indent: 1.25rem;
+    }
+
+    .transcript-text p:first-child { text-indent: 0; }
+
+    .transcript-placeholder {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+    }
+
+    .transcript-placeholder-icon { font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.3; }
+
+    /* Book Section */
+    .book-section {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 1.5rem;
+    }
+
+    .book-preview {
+      background: #fff;
+      color: #1a1612;
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .book-title-page {
+      text-align: center;
+      padding: 2rem 0;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #1a1612;
+    }
+
+    .book-title-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .book-subtitle { font-size: 1rem; color: #8b7355; margin-bottom: 1rem; }
+    .book-ornament { font-size: 1.2rem; color: #c4563a; margin: 1rem 0; }
+    .book-author { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+
+    .chapter { margin-bottom: 2rem; }
+    .chapter-number { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; color: #c4563a; }
+    .chapter-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; }
+    .chapter-content { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; line-height: 1.8; }
+    .chapter-content p { margin-bottom: 0.75rem; text-indent: 1.25rem; }
+    .chapter-content p:first-child { text-indent: 0; }
+
+    .book-settings {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .settings-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .setting-label { font-size: 0.8rem; color: var(--text-dim); }
+
+    .setting-input, .setting-select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+    }
+
+    .setting-input:focus { outline: none; border-color: var(--primary); }
+
+    .export-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
+    .export-btn {
+      padding: 0.75rem;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .export-btn:hover { transform: translateY(-1px); }
+    .export-btn.pdf { background: var(--primary); color: white; }
+    .export-btn.html { background: var(--accent); color: white; }
+    .export-btn.txt { background: var(--surface-hover); color: var(--text); border: 1px solid var(--border); }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 3000;
+      animation: slideIn 0.3s ease;
+      max-width: 400px;
+      font-size: 0.9rem;
+    }
+
+    .notification.success { border-color: var(--success); }
+    .notification.error { border-color: var(--primary); }
+    .notification.warning { border-color: var(--warning); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .book-section { grid-template-columns: 1fr; }
+      .queue-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">
+    <div class="brand-icon">📖</div>
+    PODSCRIPT<span style="color:var(--primary)">STUDIO</span>
+  </div>
+  
+  <div class="nav-actions">
+    <div class="model-badge">
+      <span class="model-dot" id="modelDot"></span>
+      <span id="modelText">AI Not Loaded</span>
+    </div>
+    <button class="btn btn-primary" id="loadModelBtn" onclick="loadModel()">Load Whisper AI</button>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>Podcast to <span>Book</span></h1>
+    <p>Load podcasts from RSS, YouTube, or upload audio files. Transcription starts automatically and runs 100% locally in your browser.</p>
+  </div>
+
+  <!-- Input Section -->
+  <div class="input-section">
+    <div class="input-tabs">
+      <button class="input-tab active" onclick="switchInputTab('rss')">📡 RSS Feed</button>
+      <button class="input-tab" onclick="switchInputTab('youtube')">📺 YouTube</button>
+      <button class="input-tab" onclick="switchInputTab('upload')">📁 Upload Files</button>
+    </div>
+
+    <!-- RSS Panel -->
+    <div class="input-panel active" id="panel-rss">
+      <div class="input-row">
+        <input type="url" id="rssInput" placeholder="Paste podcast RSS feed URL...">
+        <button class="btn btn-primary" onclick="loadRSS()">
+          <span id="rssBtnText">Load & Transcribe</span>
+        </button>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="autoTranscribeRss" checked>
+        <label for="autoTranscribeRss">Auto-start transcription when feed loads</label>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+        Try: <code style="background:var(--bg);padding:2px 6px;border-radius:3px;cursor:pointer" onclick="document.getElementById('rssInput').value='https://feeds.simplecast.com/54nAGcIl'">This American Life</code> • 
+        <code style="background:var(--bg);padding:2px 6px;border-radius:3px;cursor:pointer" onclick="document.getElementById('rssInput').value='https://feeds.npr.org/510318/podcast.xml'">NPR Up First</code>
+      </p>
+    </div>
+
+    <!-- YouTube Panel -->
+    <div class="input-panel" id="panel-youtube">
+      <div class="input-row">
+        <input type="url" id="ytInput" placeholder="Paste YouTube video URL...">
+        <button class="btn btn-primary" onclick="loadYouTube()">
+          <span id="ytBtnText">Load & Transcribe</span>
+        </button>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="autoTranscribeYt" checked>
+        <label for="autoTranscribeYt">Auto-start transcription</label>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+        ⚠️ YouTube audio is fetched via Invidious proxies. Some videos may be blocked. For best results, download audio using <a href="https://cobalt.tools" target="_blank" style="color:var(--primary)">Cobalt</a> and upload directly.
+      </p>
+    </div>
+
+    <!-- Upload Panel -->
+    <div class="input-panel" id="panel-upload">
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-area-icon">🎵</div>
+        <div class="upload-area-title">Drop audio files here or click to browse</div>
+        <div class="upload-area-hint">MP3, WAV, M4A, OGG, WEBM • Multiple files supported</div>
+        <input type="file" id="fileInput" multiple accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm" onchange="handleFileUpload(event)" style="display:none">
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Section -->
+  <div class="progress-section hidden" id="progressSection">
+    <div class="progress-header">
+      <div class="progress-title">
+        <span class="model-dot" id="progressDot"></span>
+        <span id="progressTitle">Processing...</span>
+      </div>
+      <div class="progress-stats" id="progressStats">0 / 0 episodes</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-status" id="progressStatus">Initializing...</div>
+  </div>
+
+  <!-- Queue Grid -->
+  <div class="queue-grid" id="queueGrid"></div>
+
+  <!-- Transcript Viewer -->
+  <div class="transcript-section hidden" id="transcriptSection">
+    <div class="transcript-header">
+      <div class="transcript-title" id="transcriptTitle">Select an episode</div>
+      <button class="btn" onclick="copyTranscript()">📋 Copy</button>
+    </div>
+    <div class="transcript-content">
+      <div class="transcript-placeholder" id="transcriptPlaceholder">
+        <div class="transcript-placeholder-icon">📝</div>
+        <p>Click on a completed episode to view its transcript</p>
+      </div>
+      <div class="transcript-text hidden" id="transcriptText"></div>
+    </div>
+  </div>
+
+  <!-- Book Section -->
+  <div class="book-section hidden" id="bookSection">
+    <div class="book-preview" id="bookPreview">
+      <div class="book-title-page">
+        <h1 class="book-title-main" id="bookTitleDisplay">Your Podcast Book</h1>
+        <p class="book-subtitle" id="bookSubtitleDisplay">Transcribed conversations</p>
+        <div class="book-ornament">❧</div>
+        <p class="book-author" id="bookAuthorDisplay">Author</p>
+      </div>
+      <div id="bookChapters"></div>
+    </div>
+    <div class="book-settings">
+      <h3 class="settings-title">📚 Book Settings</h3>
+      <div class="setting-group">
+        <label class="setting-label">Title</label>
+        <input type="text" class="setting-input" id="bookTitle" placeholder="Book title" oninput="updateBookPreview()">
+      </div>
+      <div class="setting-group">
+        <label class="setting-label">Subtitle</label>
+        <input type="text" class="setting-input" id="bookSubtitle" placeholder="Subtitle" oninput="updateBookPreview()">
+      </div>
+      <div class="setting-group">
+        <label class="setting-label">Author</label>
+        <input type="text" class="setting-input" id="bookAuthor" placeholder="Author name" oninput="updateBookPreview()">
+      </div>
+      <div class="setting-group">
+        <label class="setting-label">Chapter Style</label>
+        <select class="setting-select" id="chapterStyle" onchange="updateBookPreview()">
+          <option value="episode">Each Episode as Chapter</option>
+          <option value="combined">Combined Narrative</option>
+        </select>
+      </div>
+      <div class="export-buttons">
+        <button class="export-btn pdf" onclick="exportBook('pdf')">📄 Export PDF</button>
+        <button class="export-btn html" onclick="exportBook('html')">📝 Export HTML</button>
+        <button class="export-btn txt" onclick="exportBook('txt')">📋 Export TXT</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Transformers.js -->
+<script type="module">
+  import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1';
+  env.allowLocalModels = false;
+  env.useBrowserCache = true;
+  window.TransformersJS = { pipeline, env };
+</script>
+
+<script>
+// ============================================
+// STATE
+// ============================================
+const state = {
+  modelLoaded: false,
+  modelLoading: false,
+  transcriber: null,
+  queue: [],
+  transcripts: {},
+  currentTranscribing: null,
+  feedMeta: null,
+  selectedId: null
+};
+
+const CORS_PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+];
+
+// YouTube audio extraction via Invidious instances
+const YT_PROXIES = [
+  id => `https://inv.nadeko.net/latest_version?id=${id}&itag=140`,
+  id => `https://invidious.nerdvpn.de/latest_version?id=${id}&itag=140`,
+  id => `https://yewtu.be/latest_version?id=${id}&itag=140`,
+  id => `https://invidious.privacyredirect.com/latest_version?id=${id}&itag=140`,
+];
+
+// ============================================
+// INPUT TABS
+// ============================================
+function switchInputTab(tab) {
+  document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.input-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="switchInputTab('${tab}')"]`).classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+
+// ============================================
+// MODEL LOADING
+// ============================================
+async function loadModel() {
+  if (state.modelLoaded || state.modelLoading) return;
+  
+  state.modelLoading = true;
+  const btn = document.getElementById('loadModelBtn');
+  const dot = document.getElementById('modelDot');
+  const text = document.getElementById('modelText');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Loading...';
+  dot.className = 'model-dot loading';
+  text.textContent = 'Loading...';
+
+  try {
+    while (!window.TransformersJS) await sleep(100);
+    const { pipeline } = window.TransformersJS;
+
+    state.transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en', {
+      progress_callback: (p) => {
+        if (p.progress) text.textContent = `Loading ${Math.round(p.progress)}%`;
+      }
+    });
+
+    state.modelLoaded = true;
+    dot.className = 'model-dot ready';
+    text.textContent = 'AI Ready';
+    btn.innerHTML = '✓ Ready';
+    btn.style.background = 'var(--success)';
+    notify('Whisper AI loaded! Ready to transcribe.', 'success');
+    
+    // Auto-start any pending transcriptions
+    processQueue();
+  } catch (error) {
+    console.error('Model error:', error);
+    dot.className = 'model-dot';
+    text.textContent = 'Load Failed';
+    btn.disabled = false;
+    btn.innerHTML = 'Retry';
+    notify('Model load failed: ' + error.message, 'error');
+  } finally {
+    state.modelLoading = false;
+  }
+}
+
+// ============================================
+// RSS LOADING
+// ============================================
+async function loadRSS() {
+  const url = document.getElementById('rssInput').value.trim();
+  if (!url) { notify('Enter an RSS feed URL', 'error'); return; }
+
+  const btn = document.getElementById('rssBtnText');
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    let xmlText = null;
+    for (const proxyFn of CORS_PROXIES) {
+      try {
+        const resp = await fetch(proxyFn(url));
+        if (resp.ok) {
+          xmlText = await resp.text();
+          if (xmlText.includes('<rss') || xmlText.includes('<channel')) break;
+        }
+      } catch (e) { /* next */ }
+    }
+    if (!xmlText) throw new Error('Could not fetch feed');
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlText, 'text/xml');
+    const channel = xml.querySelector('channel');
+    if (!channel) throw new Error('Invalid RSS format');
+
+    const getText = (p, s) => p.querySelector(s)?.textContent?.trim() || '';
+    const stripHtml = s => s ? s.replace(/<[^>]*>/g, '').trim() : '';
+
+    let feedImage = getText(channel, 'image url') || '';
+    const itunesImg = channel.querySelector('itunes\\:image');
+    if (itunesImg) feedImage = itunesImg.getAttribute('href') || feedImage;
+
+    state.feedMeta = {
+      title: getText(channel, 'title') || 'Untitled Podcast',
+      description: stripHtml(getText(channel, 'description')),
+      image: feedImage
+    };
+
+    const items = Array.from(channel.querySelectorAll('item')).slice(0, 20);
+    const episodes = items.map((item, i) => {
+      const enc = item.querySelector('enclosure');
+      const mediaUrl = enc?.getAttribute('url') || '';
+      if (!mediaUrl) return null;
+
+      return {
+        id: `rss-${Date.now()}-${i}`,
+        title: getText(item, 'title') || `Episode ${i + 1}`,
+        description: stripHtml(getText(item, 'description') || getText(item, 'itunes\\:summary')),
+        audioUrl: mediaUrl,
+        duration: getText(item, 'itunes\\:duration') || '',
+        pubDate: getText(item, 'pubDate') || '',
+        source: 'rss',
+        status: 'pending'
+      };
+    }).filter(Boolean);
+
+    // Add to queue
+    episodes.forEach(ep => {
+      if (!state.queue.find(q => q.audioUrl === ep.audioUrl)) {
+        state.queue.push(ep);
+      }
+    });
+
+    renderQueue();
+    showProgress();
+    notify(`Loaded ${episodes.length} episodes from RSS`, 'success');
+
+    // Auto-transcribe if enabled
+    if (document.getElementById('autoTranscribeRss').checked) {
+      if (!state.modelLoaded) await loadModel();
+      processQueue();
+    }
+
+  } catch (error) {
+    notify('RSS Error: ' + error.message, 'error');
+  } finally {
+    btn.textContent = 'Load & Transcribe';
+  }
+}
+
+// ============================================
+// YOUTUBE LOADING
+// ============================================
+async function loadYouTube() {
+  const url = document.getElementById('ytInput').value.trim();
+  if (!url) { notify('Enter a YouTube URL', 'error'); return; }
+
+  const btn = document.getElementById('ytBtnText');
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const videoId = extractYouTubeId(url);
+    if (!videoId) throw new Error('Invalid YouTube URL');
+
+    // Get video info
+    const infoResp = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+    const info = await infoResp.json();
+    if (info.error) throw new Error(info.error);
+
+    const episode = {
+      id: `yt-${videoId}`,
+      title: info.title || 'YouTube Video',
+      description: `By ${info.author_name || 'Unknown'}`,
+      videoId: videoId,
+      audioUrl: null,
+      thumbnail: info.thumbnail_url,
+      source: 'youtube',
+      status: 'pending'
+    };
+
+    // Add to queue
+    if (!state.queue.find(q => q.id === episode.id)) {
+      state.queue.push(episode);
+    }
+
+    renderQueue();
+    showProgress();
+    notify('YouTube video added to queue', 'success');
+
+    // Auto-transcribe
+    if (document.getElementById('autoTranscribeYt').checked) {
+      if (!state.modelLoaded) await loadModel();
+      processQueue();
+    }
+
+  } catch (error) {
+    notify('YouTube Error: ' + error.message, 'error');
+  } finally {
+    btn.textContent = 'Load & Transcribe';
+  }
+}
+
+function extractYouTubeId(url) {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/shorts\/([^&\n?#]+)/,
+    /youtube\.com\/live\/([^&\n?#]+)/
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// ============================================
+// FILE UPLOAD
+// ============================================
+function handleFileUpload(event) {
+  const files = Array.from(event.target.files).filter(f => 
+    f.type.startsWith('audio/') || /\.(mp3|wav|m4a|ogg|webm)$/i.test(f.name)
+  );
+  
+  if (!files.length) { notify('No audio files selected', 'error'); return; }
+
+  files.forEach((file, i) => {
+    state.queue.push({
+      id: `file-${Date.now()}-${i}`,
+      title: file.name.replace(/\.[^/.]+$/, ''),
+      description: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+      audioFile: file,
+      source: 'upload',
+      status: 'pending'
+    });
+  });
+
+  renderQueue();
+  showProgress();
+  notify(`Added ${files.length} file(s) to queue`, 'success');
+
+  // Auto-transcribe uploads
+  if (!state.modelLoaded) {
+    loadModel().then(() => processQueue());
+  } else {
+    processQueue();
+  }
+}
+
+// Drag & drop
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { 
+  e.preventDefault(); 
+  uploadArea.classList.remove('dragover'); 
+  handleFileUpload({ target: { files: e.dataTransfer.files } }); 
+});
+
+// ============================================
+// TRANSCRIPTION QUEUE PROCESSING
+// ============================================
+async function processQueue() {
+  if (!state.modelLoaded || state.currentTranscribing) return;
+
+  const pending = state.queue.find(q => q.status === 'pending');
+  if (!pending) {
+    updateProgress();
+    checkShowBook();
+    return;
+  }
+
+  state.currentTranscribing = pending.id;
+  pending.status = 'transcribing';
+  renderQueue();
+  updateProgress(`Transcribing: ${pending.title}`);
+
+  try {
+    let audioData;
+
+    if (pending.audioFile) {
+      // Local file
+      audioData = await loadAndDecodeAudio(pending.audioFile);
+    } else if (pending.videoId) {
+      // YouTube - try Invidious proxies
+      audioData = await downloadYouTubeAudio(pending.videoId);
+    } else if (pending.audioUrl) {
+      // RSS audio URL
+      audioData = await downloadAndDecodeAudio(pending.audioUrl);
+    }
+
+    if (!audioData || audioData.length === 0) {
+      throw new Error('Could not load audio');
+    }
+
+    // Transcribe
+    let result;
+    try {
+      result = await state.transcriber({ raw: audioData, sampling_rate: 16000 }, {
+        chunk_length_s: 30,
+        stride_length_s: 5,
+        language: 'english',
+        task: 'transcribe'
+      });
+    } catch (e) {
+      // Fallback to WAV blob
+      const blob = float32ToWavBlob(audioData, 16000);
+      const url = URL.createObjectURL(blob);
+      result = await state.transcriber(url);
+      URL.revokeObjectURL(url);
+    }
+
+    pending.status = 'completed';
+    state.transcripts[pending.id] = formatTranscript(result.text);
+    notify(`✓ Completed: ${pending.title.slice(0, 30)}...`, 'success');
+
+  } catch (error) {
+    console.error('Transcription error:', error);
+    pending.status = 'error';
+    pending.error = error.message;
+    notify(`Error: ${pending.title.slice(0, 20)}... - ${error.message}`, 'error');
+  }
+
+  state.currentTranscribing = null;
+  renderQueue();
+  updateProgress();
+
+  // Continue processing
+  setTimeout(() => processQueue(), 100);
+}
+
+async function downloadYouTubeAudio(videoId) {
+  for (const proxyFn of YT_PROXIES) {
+    try {
+      const audioUrl = proxyFn(videoId);
+      console.log('Trying YT proxy:', audioUrl);
+      const resp = await fetch(audioUrl);
+      if (resp.ok) {
+        const buffer = await resp.arrayBuffer();
+        if (buffer.byteLength > 10000) {
+          console.log('Got YT audio:', buffer.byteLength, 'bytes');
+          return await decodeAndResample(buffer);
+        }
+      }
+    } catch (e) {
+      console.warn('YT proxy failed:', e.message);
+    }
+  }
+  throw new Error('Could not fetch YouTube audio. Try downloading manually from cobalt.tools');
+}
+
+async function downloadAndDecodeAudio(url) {
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const resp = await fetch(proxyFn(url));
+      if (resp.ok) {
+        const buffer = await resp.arrayBuffer();
+        if (buffer.byteLength > 1000) {
+          return await decodeAndResample(buffer);
+        }
+      }
+    } catch (e) { /* next */ }
+  }
+  throw new Error('Could not download audio');
+}
+
+async function loadAndDecodeAudio(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try { resolve(await decodeAndResample(e.target.result)); }
+      catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function decodeAndResample(arrayBuffer) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+    
+    let audioData;
+    if (audioBuffer.numberOfChannels === 1) {
+      audioData = audioBuffer.getChannelData(0);
+    } else {
+      const left = audioBuffer.getChannelData(0);
+      const right = audioBuffer.getChannelData(1);
+      audioData = new Float32Array(left.length);
+      for (let i = 0; i < left.length; i++) audioData[i] = (left[i] + right[i]) / 2;
+    }
+
+    if (audioBuffer.sampleRate !== 16000) {
+      audioData = resample(audioData, audioBuffer.sampleRate, 16000);
+    }
+
+    // Normalize quiet audio
+    let max = 0;
+    for (let i = 0; i < audioData.length; i++) if (Math.abs(audioData[i]) > max) max = Math.abs(audioData[i]);
+    if (max > 0 && max < 0.01) {
+      const scale = 0.5 / max;
+      for (let i = 0; i < audioData.length; i++) audioData[i] *= scale;
+    }
+
+    await ctx.close();
+    return audioData;
+  } catch (e) {
+    await ctx.close();
+    throw e;
+  }
+}
+
+function resample(data, fromRate, toRate) {
+  const ratio = fromRate / toRate;
+  const newLen = Math.round(data.length / ratio);
+  const result = new Float32Array(newLen);
+  for (let i = 0; i < newLen; i++) {
+    const idx = i * ratio;
+    const floor = Math.floor(idx);
+    const ceil = Math.min(floor + 1, data.length - 1);
+    const t = idx - floor;
+    result[i] = data[floor] * (1 - t) + data[ceil] * t;
+  }
+  return result;
+}
+
+function float32ToWavBlob(float32, sampleRate) {
+  const len = float32.length;
+  const buffer = new ArrayBuffer(44 + len * 2);
+  const view = new DataView(buffer);
+  const writeStr = (off, str) => { for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); };
+  writeStr(0, 'RIFF'); view.setUint32(4, 36 + len * 2, true); writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true); view.setUint16(34, 16, true); writeStr(36, 'data'); view.setUint32(40, len * 2, true);
+  let off = 44;
+  for (let i = 0; i < len; i++) {
+    const s = Math.max(-1, Math.min(1, float32[i]));
+    view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    off += 2;
+  }
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+function formatTranscript(text) {
+  if (!text || text.length < 5) return '<p>No speech detected.</p>';
+  text = text.replace(/\s+/g, ' ').trim();
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const paragraphs = [];
+  for (let i = 0; i < sentences.length; i += 4) {
+    const para = sentences.slice(i, i + 4).join(' ').trim();
+    if (para) paragraphs.push(`<p>${escapeHtml(para)}</p>`);
+  }
+  return paragraphs.join('\n') || '<p>Transcription complete.</p>';
+}
+
+// ============================================
+// UI RENDERING
+// ============================================
+function renderQueue() {
+  const grid = document.getElementById('queueGrid');
+  
+  grid.innerHTML = state.queue.map(item => {
+    const statusIcon = item.status === 'completed' ? '✓' : 
+                       item.status === 'transcribing' ? '⏳' : 
+                       item.status === 'error' ? '✕' : '○';
+    
+    return `
+      <div class="queue-item ${item.status}" onclick="selectItem('${item.id}')">
+        <div class="queue-item-header">
+          <div class="queue-item-title">${escapeHtml(item.title)}</div>
+          <div class="queue-item-status">${statusIcon}</div>
+        </div>
+        <div class="queue-item-meta">
+          ${item.duration || item.description || item.source}
+          ${item.error ? ` • ${item.error}` : ''}
+        </div>
+        ${item.status === 'transcribing' ? '<div class="queue-item-progress"><div class="queue-item-progress-bar" style="width:50%;animation:pulse 1.5s infinite"></div></div>' : ''}
+        ${item.status === 'completed' ? '<div class="queue-item-progress"><div class="queue-item-progress-bar" style="width:100%"></div></div>' : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectItem(id) {
+  state.selectedId = id;
+  const item = state.queue.find(q => q.id === id);
+  if (!item) return;
+
+  document.getElementById('transcriptSection').classList.remove('hidden');
+  document.getElementById('transcriptTitle').textContent = item.title;
+
+  if (state.transcripts[id]) {
+    document.getElementById('transcriptPlaceholder').classList.add('hidden');
+    document.getElementById('transcriptText').classList.remove('hidden');
+    document.getElementById('transcriptText').innerHTML = state.transcripts[id];
+  } else {
+    document.getElementById('transcriptPlaceholder').classList.remove('hidden');
+    document.getElementById('transcriptText').classList.add('hidden');
+  }
+}
+
+function copyTranscript() {
+  if (!state.selectedId || !state.transcripts[state.selectedId]) {
+    notify('No transcript to copy', 'warning');
+    return;
+  }
+  const div = document.createElement('div');
+  div.innerHTML = state.transcripts[state.selectedId];
+  navigator.clipboard.writeText(div.textContent);
+  notify('Transcript copied!', 'success');
+}
+
+function showProgress() {
+  document.getElementById('progressSection').classList.remove('hidden');
+  updateProgress();
+}
+
+function updateProgress(statusText) {
+  const completed = state.queue.filter(q => q.status === 'completed').length;
+  const total = state.queue.length;
+  const pct = total > 0 ? (completed / total * 100) : 0;
+
+  document.getElementById('progressBar').style.width = `${pct}%`;
+  document.getElementById('progressStats').textContent = `${completed} / ${total} episodes`;
+  document.getElementById('progressDot').className = state.currentTranscribing ? 'model-dot loading' : (completed === total ? 'model-dot ready' : 'model-dot');
+  document.getElementById('progressTitle').textContent = state.currentTranscribing ? 'Transcribing...' : (completed === total ? 'All Complete!' : 'Processing');
+  document.getElementById('progressStatus').textContent = statusText || (completed === total ? 'All transcriptions finished. Create your book below!' : 'Waiting...');
+}
+
+function checkShowBook() {
+  const completed = state.queue.filter(q => q.status === 'completed').length;
+  if (completed > 0) {
+    document.getElementById('bookSection').classList.remove('hidden');
+    document.getElementById('bookTitle').value = state.feedMeta?.title || 'My Podcast Book';
+    updateBookPreview();
+  }
+}
+
+// ============================================
+// BOOK GENERATION
+// ============================================
+function updateBookPreview() {
+  const title = document.getElementById('bookTitle').value || 'My Podcast Book';
+  const subtitle = document.getElementById('bookSubtitle').value || '';
+  const author = document.getElementById('bookAuthor').value || '';
+  const style = document.getElementById('chapterStyle').value;
+
+  document.getElementById('bookTitleDisplay').textContent = title;
+  document.getElementById('bookSubtitleDisplay').textContent = subtitle;
+  document.getElementById('bookAuthorDisplay').textContent = author;
+
+  const transcribed = state.queue.filter(q => state.transcripts[q.id]);
+  const container = document.getElementById('bookChapters');
+
+  if (style === 'episode') {
+    container.innerHTML = transcribed.map((item, i) => `
+      <div class="chapter">
+        <div class="chapter-number">Chapter ${i + 1}</div>
+        <div class="chapter-title">${escapeHtml(item.title)}</div>
+        <div class="chapter-content">${state.transcripts[item.id]}</div>
+      </div>
+    `).join('');
+  } else {
+    container.innerHTML = `<div class="chapter"><div class="chapter-content">${transcribed.map(q => state.transcripts[q.id]).join('')}</div></div>`;
+  }
+}
+
+function exportBook(format) {
+  const title = document.getElementById('bookTitle').value || 'My Podcast Book';
+  const subtitle = document.getElementById('bookSubtitle').value || '';
+  const author = document.getElementById('bookAuthor').value || '';
+  const style = document.getElementById('chapterStyle').value;
+  const transcribed = state.queue.filter(q => state.transcripts[q.id]);
+
+  if (format === 'txt') {
+    let txt = `${'='.repeat(50)}\n${title.toUpperCase()}\n${subtitle}\nBy ${author}\n${'='.repeat(50)}\n\n`;
+    transcribed.forEach((item, i) => {
+      if (style === 'episode') txt += `\n--- CHAPTER ${i+1}: ${item.title} ---\n\n`;
+      const div = document.createElement('div'); div.innerHTML = state.transcripts[item.id];
+      div.querySelectorAll('p').forEach(p => txt += p.textContent + '\n\n');
+    });
+    downloadFile(txt, `${sanitize(title)}.txt`, 'text/plain');
+  } else {
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(title)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{font-family:'Cormorant Garamond',serif;max-width:650px;margin:0 auto;padding:2rem;line-height:1.8;color:#1a1612}
+.title-page{text-align:center;page-break-after:always;padding:3rem 0}h1{font-size:2.2rem}.subtitle{color:#8b7355}
+.ornament{font-size:1.2rem;color:#c4563a;margin:1rem 0}.author{font-style:italic}.chapter{page-break-before:always}
+.chapter-number{font-size:.8rem;text-transform:uppercase;letter-spacing:.2em;color:#c4563a}
+.chapter-title{font-size:1.4rem;font-weight:600;margin-bottom:1rem}p{margin-bottom:.85rem;text-indent:1.25em}</style></head>
+<body><div class="title-page"><h1>${escapeHtml(title)}</h1><p class="subtitle">${escapeHtml(subtitle)}</p><div class="ornament">❧</div><p class="author">${escapeHtml(author)}</p></div>
+${transcribed.map((q,i) => `<div class="chapter">${style==='episode'?`<div class="chapter-number">Chapter ${i+1}</div><h2 class="chapter-title">${escapeHtml(q.title)}</h2>`:''}${state.transcripts[q.id]}</div>`).join('')}</body></html>`;
+
+    if (format === 'pdf') {
+      const win = window.open('', '_blank');
+      win.document.write(html); win.document.close();
+      setTimeout(() => win.print(), 500);
+    } else {
+      downloadFile(html, `${sanitize(title)}.html`, 'text/html');
+    }
+  }
+}
+
+// ============================================
+// UTILITIES
+// ============================================
+function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text || ''; return div.innerHTML; }
+function sanitize(name) { return (name || 'book').replace(/[^a-z0-9]/gi, '_').slice(0, 50); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function downloadFile(content, filename, mime) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], { type: mime })); a.download = filename; a.click(); }
+
+function notify(message, type = 'info') {
+  document.querySelector('.notification')?.remove();
+  const n = document.createElement('div');
+  n.className = `notification ${type}`;
+  n.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span> ${message}`;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 4000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  podscript-studio:
+    build: .
+    container_name: podscript-studio
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CACHE_TTL_MS=600000
+      - EP_LIMIT=100
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
